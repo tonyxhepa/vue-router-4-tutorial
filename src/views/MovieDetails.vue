@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { onMounted } from 'vue';
+import { useMoviesStore } from '../stores/movies';
 
 const props = defineProps({
   id: {
@@ -9,42 +9,34 @@ const props = defineProps({
   }
 })
 
-const queryMovie = ref({})
-const isLoading = ref(true)
-const router = useRouter()
+const moviesStore = useMoviesStore();
 
 onMounted(async() => {
-      const result = await fetch(`http://localhost:8000/movies/${parseInt(props.id)}`);
-      if(result.status === 404){
-        router.push({name: 'NotFound'})
-      }
-      const response = await result.json();
-      queryMovie.value = response;
-      isLoading.value = false;
+      await moviesStore.getSingleMovie(props.id)
 })
 
 </script>
 <template>
  <section class="bg-white dark:bg-gray-900 m-6 p-4">
-      <div class="container" v-if="isLoading">Is Loading...</div>
+      <div class="container" v-if="moviesStore.isLoading">Is Loading...</div>
       <div v-else class="container flex flex-col items-center px-4 py-12 mx-auto xl:flex-row">
         <div class="flex justify-center xl:w-1/2">
           <img
             class="h-80 w-80 sm:w-[28rem] sm:h-[28rem] flex-shrink-0 object-cover rounded-md"
-            :src="queryMovie.poster"
-            :alt="queryMovie.title"
+            :src="moviesStore.singleMovie.poster"
+            :alt="moviesStore.singleMovie.title"
           />
         </div>
 
         <div class="flex flex-col items-center mt-6 xl:items-start xl:w-1/2 xl:mt-0">
           <h2 class="text-3xl font-bold tracking-tight text-gray-800 xl:text-4xl dark:text-white">
-            {{ queryMovie.title }}
+            {{ moviesStore.singleMovie.title }}
           </h2>
           <span class="m-2 p-2 bg-slate-300 text-slate-800 rounded-md">
-            {{  queryMovie.year }}
+            {{  moviesStore.singleMovie.year }}
           </span>
           <span class="m-2 p-2 bg-slate-300 text-slate-800 rounded-md">
-            {{ queryMovie.runtime }}
+            {{ moviesStore.singleMovie.runtime }}
           </span>
 
           <div class="mt-6 sm:-mx-2">
